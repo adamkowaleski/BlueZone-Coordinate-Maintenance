@@ -1,0 +1,107 @@
+Sub FyzX_Loop()
+
+'***Code by: Adam Kowaleski. This code is for BlueZone VT Ops users.
+'***User must input existing locations into column A, along with desired X, Y, and Z values (cols B, C, D).
+'***An on-screen counter shows progress. The code speed should be monitored depending on back-end programming.
+'***The BlueZone screen will be copied onto the sheet where a spacing decision is made.
+'***No additional logic has been added to overcome errors by design - again, depending on back-end programming, this macro should be monitored by the user.****
+
+'Reset count
+Range("E10").Value = 0
+
+'***Must start at IMLOA screen
+
+Dim bzhao As Object
+Set bzhao = CreateObject("BZWhll.WhllObj")
+bzhao.Connect ""
+
+Dim myLoc As Variant
+Dim myX As Variant
+Dim myY As Variant
+Dim myZ As Variant
+
+Dim myRange As Range
+
+Set myRange = Worksheets("FiX").Range("A2:A1000")
+
+For Each myLoc In myRange
+
+'End loop at blank cell
+    If myLoc = "" Then
+        Exit For
+            End If
+            
+myX = myLoc.Offset(0, 1).Value
+myY = myLoc.Offset(0, 2).Value
+myZ = myLoc.Offset(0, 3).Value
+                       
+'Query location
+bzhao.SendKey "Q"
+bzhao.Wait 1
+bzhao.SendKey myLoc
+bzhao.Wait 0.2
+bzhao.SendKey "<enter>"
+bzhao.Wait 0.2
+
+'Copy screen to get res#
+
+bzhao.Wait 1
+bzhao.Copy 32
+bzhao.Wait 1
+
+'Paste info to sheet for res_check
+
+Range("K1").Select
+ActiveSheet.Paste
+
+'Modify data
+
+bzhao.SendKey "M"
+bzhao.Wait 0.2
+bzhao.SendKey "<tab><tab><tab><tab><tab>" 'tab to Res
+
+
+'Decide 6 or 7 tabs
+
+If Worksheets("FiX").Range("E8").Value > 0 Then
+
+    bzhao.Wait 0.1
+    bzhao.SendKey "<tab>"
+   
+Else
+    
+    End If
+
+'Enter X'
+bzhao.Wait 0.1
+bzhao.SendKey "<tab>"
+bzhao.Wait 0.1
+bzhao.SendKey myX
+bzhao.Wait 0.1
+
+'Enter Y'
+bzhao.Wait 1
+bzhao.SendKey "<tab>"
+bzhao.SendKey myY
+
+'Enter Z'
+bzhao.Wait 1
+bzhao.SendKey "<tab>"
+bzhao.SendKey myZ
+
+'Enter-Exit
+bzhao.SendKey "<enter>"
+bzhao.Wait 0.1
+bzhao.SendKey "E"
+bzhao.Wait 0.5
+
+
+'Display counter
+Count = Range("E10").Value
+Worksheets("FiX").Range("E10").Value = Count + 1
+
+
+Next myLoc
+
+
+End Sub
